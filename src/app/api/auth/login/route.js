@@ -1,3 +1,4 @@
+import { decryptJSON, encryptJSON } from "@/lib/jwUtils";
 import { connectToDatabase } from "@/lib/mongodb";
 import CryptoJS from "crypto-js";
 
@@ -19,17 +20,17 @@ export async function POST(request) {
         const { database } = await connectToDatabase();
         const collection = database.collection(process.env.MONGODB_USERS);
 
-        const {data} = await request.json();
+        const  body  = await request.json();
+        console.log(body);
 
-        
+        console.log(process.env.ENCRYPTION_CLIENT_KEY); 
 
-        const decryptedBytes = CryptoJS.AES.decrypt(data, process.env.ENCRYPTION_CLIENT_KEY);
-        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
-        const { email, password } = JSON.parse(decryptedText);
+        let {email,password} = decryptJSON(body.encryptedData,body.iv,process.env.ENCRYPTION_CLIENT_KEY);
 
-        console.log(email, password);
+        console.log(email);
+        console.log(password);
 
-        const usuario = await collection.findOne({ email });
+        const usuario = await collection.findOne( {email} );
 
         if (!usuario) {
             return Response.json(
@@ -45,9 +46,18 @@ export async function POST(request) {
             );
         }
 
+        const loginToken = {
+            usuarioId: usuario._id,//inicialmente se manda como token de inicio de sesion el cual se guarda en localstorage, el id de usuario, se pueden mandar alguna frase de seguraidad o algo mas
+        };
+
+        const encryptedLoginToken = encryptJSON(loginToken,process.env.ENCRYPTION_SERVER_KEY);
+
         return Response.json({
             message: "Autenticación exitosa",
+            body: JSON.stringify(encryptedLoginToken),
         }, { status: 202 });
+
+        
     } catch (error) {
         console.error("Error en el servidor:", error);
         return Response.json({ message: "Hubo un error en el servidor" }, { status: 500 });
