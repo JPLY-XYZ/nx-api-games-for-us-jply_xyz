@@ -1,6 +1,6 @@
-import { decryptJSON, encryptJSON } from "@/lib/jwUtils";
+import { decryptJSON, encryptJSON } from "@/lib/cryptoUtils";
 import { connectToDatabase } from "@/lib/mongodb";
-import CryptoJS from "crypto-js";
+
 
 
 export async function OPTIONS(request) {

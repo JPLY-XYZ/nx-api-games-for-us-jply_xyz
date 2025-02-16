@@ -1,4 +1,4 @@
-import { decryptJSON } from "@/lib/jwUtils";
+import { decryptJSON } from "@/lib/cryptoUtils";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
