@@ -16,10 +16,6 @@ const nextConfig = {async headers() {
             key: "Access-Control-Allow-Headers",
             value: "Content-Type, Authorization,x-api-key ",
           },
-          {
-            key: "Access-Control-Allow-Origin",
-            value: "*", // Permitir solicitudes de cualquier origen
-          },
         ],
       },
     ];

@@ -40,9 +40,14 @@ export async function POST(request) {
             );
         }
 
+        const userData = {
+            nickname: usuario.nickname,
+            avatar_url: usuario.avatar_url,
+        };
 
         return Response.json({
-            message: "Inicio de sesión exitoso"
+            message: "Inicio de sesión exitoso",
+            body: JSON.stringify(userData), 
         }, { status: 200 });
 
     } catch (error) {
