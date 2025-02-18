@@ -22,32 +22,37 @@ export async function POST(request) {
         const body = await request.json();
         console.log(body);
 
-        console.log(process.env.ENCRYPTION_SERVER_KEY);
+        // console.log(process.env.ENCRYPTION_SERVER_KEY);
 
-        let { usuarioId } = decryptJSON(body.encryptedData, body.iv, process.env.ENCRYPTION_SERVER_KEY);
+        let {usuarioId, password} = decryptJSON(body.encryptedData, body.iv, process.env.ENCRYPTION_CLIENT_KEY);
+        let subdata = JSON.parse(usuarioId);
+        let userId = decryptJSON(subdata.encryptedData, subdata.iv, process.env.ENCRYPTION_SERVER_KEY);
 
-        console.log(usuarioId);
+        console.log(userId);
+        console.log(password);
 
         const { database } = await connectToDatabase();
         const collection = database.collection(process.env.MONGODB_USERS);
 
-        const usuario = await collection.findOne( {_id: new ObjectId(usuarioId)} );
+        const usuario = await collection.findOne( {_id: new ObjectId(userId.usuarioId)} );
+        
 
-        if (!usuario) {
+        if (usuario.password == password) {
             return Response.json(
-                { message: "El usuario no existe" },
+                { message: "El password es el mismo" },
                 { status: 401 }
             );
         }
 
-        const userData = {
-            nickName: usuario.nickName,
-            avatar_url: usuario.avatar_url,
-        };
+        const results = await collection.updateOne(
+            { _id: new ObjectId(userId.usuarioId) },
+            { $set: { password } }
+        );
+
+        console.log(results);
 
         return Response.json({
-            message: "Inicio de sesión exitoso",
-            body: JSON.stringify(userData), 
+            message: "Datos enviados correctamente"
         }, { status: 200 });
 
     } catch (error) {

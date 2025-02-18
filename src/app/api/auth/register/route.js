@@ -25,26 +25,43 @@ export async function POST(request) {
 
         console.log(process.env.ENCRYPTION_CLIENT_KEY);
 
-        let { email, password } = decryptJSON(body.encryptedData, body.iv, process.env.ENCRYPTION_CLIENT_KEY);
+        let { email, password, fullName, nickName } = decryptJSON(body.encryptedData, body.iv, process.env.ENCRYPTION_CLIENT_KEY);
+
+
+        const usuarioExixtente = await collection.findOne({ email });
+
+        if (usuarioExixtente) {
+            return Response.json(
+                { message: "El usuario ya existe" },
+                { status: 406 }
+            );
+        }
 
         console.log(email);
         console.log(password);
+        console.log(fullName);
+        console.log(nickName);
+
+        const availableColors = ["blue", "green", "red", "purple", "yellow", "orange", "navy", "turquoise", "magenta", "gray"];
+        function getRandomColor() {
+            const idx = Math.floor(Math.random() * availableColors.length);
+            return availableColors[idx];
+        }
+        const avatar_url = 'https://placehold.co/400x400/' + getRandomColor() + '/white?text=' + nickName.substring(0, 1).toUpperCase();
+
+        let newUser = {
+            email,
+            password,
+            fullName,
+            nickName,
+            avatar_url,
+            created_at: new Date().toISOString(),
+        }
+
+        await collection.insertOne(newUser);
 
         const usuario = await collection.findOne({ email });
 
-        if (!usuario) {
-            return Response.json(
-                { message: "El usuario no existe" },
-                { status: 401 }
-            );
-        }
-
-        if (usuario.password !== password) {
-            return Response.json(
-                { message: "La contraseña es incorrecta" },
-                { status: 401 }
-            );
-        }
 
         const loginToken = {
             usuarioId: usuario._id,//inicialmente se manda como token de inicio de sesion el cual se guarda en localstorage, el id de usuario, se pueden mandar alguna frase de seguraidad o algo mas

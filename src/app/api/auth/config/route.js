@@ -43,10 +43,12 @@ export async function POST(request) {
         const userData = {
             nickName: usuario.nickName,
             avatar_url: usuario.avatar_url,
+            email: usuario.email,
+            fullName: usuario.fullName
         };
 
         return Response.json({
-            message: "Inicio de sesión exitoso",
+            message: "Datos enviados correctamente",
             body: JSON.stringify(userData), 
         }, { status: 200 });
 
