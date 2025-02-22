@@ -2,6 +2,7 @@ import { decryptJSON } from "@/lib/cryptoUtils";
 import { images } from "../../../../../../next.config";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { setCache } from "@/lib/cacheUtils";
 
 export async function OPTIONS(request) {
     return new Response("OK", { status: 200 });
@@ -1288,7 +1289,8 @@ export async function POST(request) {
             btnStatus: { liked: usuario.liked_games.includes(game.id.toString()), saved: usuario.saved_games.includes(game.id.toString())  }
         }
     });
-    console.log(games);
+    await setCache(games);
+    // console.log(games);
 
     return Response.json(games);
 }
@@ -2557,6 +2559,7 @@ export async function GET(request) {
             btnStatus: { liked: false, saved: false }
         }
     });
+    await setCache(games);
     // console.log(games);
 
     return Response.json(games);
