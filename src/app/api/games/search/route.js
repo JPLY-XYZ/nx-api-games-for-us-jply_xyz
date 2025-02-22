@@ -38,12 +38,15 @@ export async function POST(request) {
 
     console.log(usuario.liked_games);
 
+    let data = [];
 
     if (search == "") {
-        console.log("no hay busqueda");
+        data = await findCache(search, 30);
+    } else {
+        data = await findCache(search, 0);
     }
 
-    const data = await findCache(search);
+   
 
     if (data.length > 0) {
         console.log("Mostrando cache");

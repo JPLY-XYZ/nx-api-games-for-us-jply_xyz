@@ -33,10 +33,10 @@ export async function setCache(data) {
   
 }
 
-export async function findCache(name) {
+export async function findCache(name, limit) {
     const { database } = await connectToDatabase();
     const collection = database.collection(process.env.MONGODB_CACHE_GAMES);
-    const results = await collection.find({ name: { $regex: `.*${name}.*`, $options: "i" } }).toArray();
+    const results = await collection.find({ name: { $regex: `.*${name}.*`, $options: "i" } }).limit(limit).toArray();
 
 
     // console.log(results);
