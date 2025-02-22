@@ -56,6 +56,8 @@ export async function POST(request) {
             nickName,
             avatar_url,
             created_at: new Date().toISOString(),
+            liked_games: [],
+            saved_games: [],
         }
 
         await collection.insertOne(newUser);
