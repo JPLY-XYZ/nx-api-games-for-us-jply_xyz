@@ -1,4 +1,4 @@
-import { decryptJSON, encryptJSON } from "@/lib/cryptoUtils";
+import { decryptJSON, encryptJSON, hashPassword } from "@/lib/cryptoUtils";
 import { connectToDatabase } from "@/lib/mongodb";
 
 
@@ -8,6 +8,8 @@ export async function OPTIONS(request) {
 }
 
 export async function POST(request) {
+    const bcrypt = require('bcrypt');
+
     try {
         const apiKeyHeader = request.headers.get("x-api-key");
         if (apiKeyHeader !== process.env.CLIENT_API_KEY) {
@@ -28,7 +30,7 @@ export async function POST(request) {
         let { email, password, fullName, nickName } = decryptJSON(body.encryptedData, body.iv, process.env.ENCRYPTION_CLIENT_KEY);
 
 
-        const usuarioExixtente = await collection.findOne({ email });
+        const usuarioExixtente = await collection.findOne({ email: email.toUpperCase() });
 
         if (usuarioExixtente) {
             return Response.json(
@@ -42,6 +44,8 @@ export async function POST(request) {
         console.log(fullName);
         console.log(nickName);
 
+        
+
         const availableColors = ["blue", "green", "red", "purple", "yellow", "orange", "navy", "turquoise", "magenta", "gray"];
         function getRandomColor() {
             const idx = Math.floor(Math.random() * availableColors.length);
@@ -50,8 +54,8 @@ export async function POST(request) {
         const avatar_url = 'https://placehold.co/400x400/' + getRandomColor() + '/white?text=' + nickName.substring(0, 1).toUpperCase();
 
         let newUser = {
-            email,
-            password,
+            email : email.toUpperCase(),
+            password : await hashPassword(password),
             fullName,
             nickName,
             avatar_url,
@@ -62,11 +66,11 @@ export async function POST(request) {
 
         await collection.insertOne(newUser);
 
-        const usuario = await collection.findOne({ email });
+        const usuario = await collection.findOne({ email: email.toUpperCase() });
 
 
         const loginToken = {
-            usuarioId: usuario._id,//inicialmente se manda como token de inicio de sesion el cual se guarda en localstorage, el id de usuario, se pueden mandar alguna frase de seguraidad o algo mas
+            usuarioId: usuario._id,  //inicialmente se manda como token de inicio de sesion el cual se guarda en localstorage, el id de usuario, se pueden mandar alguna frase de seguraidad o algo mas
         };
 
         const userData = {

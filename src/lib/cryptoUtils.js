@@ -20,3 +20,27 @@ export function encryptJSON(data,key) {
     return JSON.parse(decrypted);
   }
 
+
+
+  const bcrypt = require('bcrypt');
+
+  export async function hashPassword(password) {
+      try {
+          const hashedPassword = await bcrypt.hash(password, 10);
+          console.log(hashedPassword);
+          return hashedPassword;
+      } catch (err) {
+          throw err;
+      }
+  }
+  
+  export async function comparePassword(plainPassword, hashedPassword) {
+      try {
+          const result = await bcrypt.compare(plainPassword, hashedPassword);
+          console.log(result);
+          return result;
+      } catch (err) {
+          throw err;
+      }
+  }
+  

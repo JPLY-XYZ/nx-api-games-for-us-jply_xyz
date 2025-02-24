@@ -36,7 +36,7 @@ export async function POST(request) {
 
         const usuario = await collection.findOne( {_id: new ObjectId(userId.usuarioId)} );
         
-        if (usuario.email == email) {
+        if (usuario.email == email.toUpperCase()) {
             return Response.json(
                 { message: "El email es el mismo" },
                 { status: 401 }

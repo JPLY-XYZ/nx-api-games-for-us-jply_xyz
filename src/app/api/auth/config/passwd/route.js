@@ -1,4 +1,4 @@
-import { decryptJSON } from "@/lib/cryptoUtils";
+import { comparePassword, decryptJSON, hashPassword } from "@/lib/cryptoUtils";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
@@ -37,7 +37,7 @@ export async function POST(request) {
         const usuario = await collection.findOne( {_id: new ObjectId(userId.usuarioId)} );
         
 
-        if (usuario.password == password) {
+        if (await comparePassword(password, usuario.password) == false) {
             return Response.json(
                 { message: "El password es el mismo" },
                 { status: 401 }
@@ -46,7 +46,7 @@ export async function POST(request) {
 
         const results = await collection.updateOne(
             { _id: new ObjectId(userId.usuarioId) },
-            { $set: { password } }
+            { $set: { password : await hashPassword(password) } }
         );
 
         console.log(results);

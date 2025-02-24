@@ -57,3 +57,4 @@ export async function POST(request) {
         return Response.json({ message: "Hubo un error en el servidor" }, { status: 500 });
     }
 }
+

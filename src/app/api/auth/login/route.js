@@ -1,4 +1,4 @@
-import { decryptJSON, encryptJSON } from "@/lib/cryptoUtils";
+import { comparePassword, decryptJSON, encryptJSON } from "@/lib/cryptoUtils";
 import { connectToDatabase } from "@/lib/mongodb";
 
 
@@ -30,7 +30,7 @@ export async function POST(request) {
         console.log(email);
         console.log(password);
 
-        const usuario = await collection.findOne({ email });
+        const usuario = await collection.findOne({ email : email.toUpperCase() });
 
         if (!usuario) {
             return Response.json(
@@ -39,12 +39,16 @@ export async function POST(request) {
             );
         }
 
-        if (usuario.password !== password) {
+        console.log("contraseña verificada" ,await comparePassword(password, usuario.password));
+
+        if (await comparePassword(password, usuario.password) == false) {
             return Response.json(
                 { message: "La contraseña es incorrecta" },
                 { status: 401 }
             );
         }
+
+
 
         const loginToken = {
             usuarioId: usuario._id,//inicialmente se manda como token de inicio de sesion el cual se guarda en localstorage, el id de usuario, se pueden mandar alguna frase de seguraidad o algo mas
