@@ -69,6 +69,7 @@ export async function POST(request) {
             }
         }, { status: 202 });
 
+        
 
     } catch (error) {
         console.error("Error en el servidor:", error);

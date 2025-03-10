@@ -44,7 +44,8 @@ export async function POST(request) {
             nickName: usuario.nickName,
             avatar_url: usuario.avatar_url,
             email: usuario.email,
-            fullName: usuario.fullName
+            fullName: usuario.fullName,
+            steamId64: usuario.steamId64
         };
 
         return Response.json({
