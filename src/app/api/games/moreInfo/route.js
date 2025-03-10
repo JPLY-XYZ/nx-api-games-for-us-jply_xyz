@@ -103,6 +103,7 @@ async function verifySteamId64(steamId64) {
 
 
 // 🎮 Función para obtener juegos de Steam
+// 🎮 Función para obtener juegos de Steam
 async function getSteamGames(steamId64) {
     const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId64}&include_appinfo=true`;
     try {
@@ -151,7 +152,8 @@ async function getUserGames(steamId64, usuarioId) {
     const steamGames = await getSteamGames(steamId64);
     const gamesData = [];
 
-    for (const gameName of steamGames) {
+    // Realizamos las consultas en paralelo
+    const rawgGamesPromises = steamGames.map(async (gameName) => {
         const game = await searchGameInRawg(gameName);
         if (game) {
             const gameId = game.id.toString();
@@ -173,7 +175,10 @@ async function getUserGames(steamId64, usuarioId) {
                 },
             });
         }
-    }
+    });
+
+    // Esperamos todas las búsquedas en paralelo
+    await Promise.all(rawgGamesPromises);
 
     // 🚀 Cacheamos los juegos
     await setCache(gamesData);
