@@ -8,6 +8,8 @@ export async function OPTIONS(request) {
     return new Response("OK", { status: 200 });
 }
 
+import { AbortController } from 'abort-controller'; // Importar AbortController si no lo tienes en tu entorno
+
 export async function POST(request) {
     const apiKeyHeader = request.headers.get("x-api-key");
     if (apiKeyHeader !== process.env.CLIENT_API_KEY) {
@@ -15,10 +17,9 @@ export async function POST(request) {
             { message: "No tienes permiso para acceder a este recurso" },
             { status: 401 }
         );
-    };
+    }
 
     const steamId64 = request.nextUrl.searchParams.get("steamId64");
-
     const body = await request.json();
     console.log(body);
 
@@ -36,32 +37,44 @@ export async function POST(request) {
         );
     }
 
-    await collection.updateOne(
-        { _id: new ObjectId(usuarioId) }, // Filtro para encontrar el usuario
-        { $set: { steamId64: steamId64 } } // Nuevo campo steamId64 con su valor
-    );
+    // Configurando el timeout usando AbortController
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minutos de timeout (300,000 ms)
 
-    const result = await verifySteamId64(steamId64);
+    try {
+        await collection.updateOne(
+            { _id: new ObjectId(usuarioId) }, // Filtro para encontrar el usuario
+            { $set: { steamId64: steamId64 } } // Nuevo campo steamId64 con su valor
+        );
 
-    if (result.exists) {
-        // Si el SteamID64 es válido, obtenemos los juegos del usuario
-       await getUserGames(steamId64, usuarioId);
+        const result = await verifySteamId64(steamId64, { signal: controller.signal });
 
-        // Mostrar los juegos en consola (si es necesario, puedes modificar esto)
+        if (result.exists) {
+            // Si el SteamID64 es válido, obtenemos los juegos del usuario
+            await getUserGames(steamId64, usuarioId, { signal: controller.signal });
 
+            // Limpiar timeout después de la respuesta
+            clearTimeout(timeoutId);
 
-        // Responder con un mensaje que indica que la actualización se realizó correctamente
-        return Response.json({ message: "Actualizando" }, { status: 200 });
-    } else {
-        // Si el SteamID64 no es válido, respondemos con un error 401
+            // Responder con un mensaje que indica que la actualización se realizó correctamente
+            return Response.json({ message: "Actualizando" }, { status: 200 });
+        } else {
+            // Si el SteamID64 no es válido, respondemos con un error 401
+            return Response.json({ message: result.message }, { status: 401 });
+        }
 
-        return Response.json({ message: result.message }, { status: 401 });
+    } catch (error) {
+        // Limpiar timeout en caso de error
+        clearTimeout(timeoutId);
+
+        if (error.name === 'AbortError') {
+            console.error('La solicitud fue abortada debido al tiempo de espera agotado');
+            return Response.json({ message: 'Tiempo de espera agotado' }, { status: 408 }); // 408: Request Timeout
+        } else {
+            console.error("Ocurrió un error:", error);
+            return Response.json({ message: "Error interno del servidor" }, { status: 500 });
+        }
     }
-
-
-
-
-
 }
 
 
