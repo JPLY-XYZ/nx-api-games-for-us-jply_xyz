@@ -17,8 +17,8 @@ export async function POST(request) {
         };
 
     const today = new Date();
-    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
-    const lastDayOfWeek = new Date(today.setDate(firstDayOfWeek.getDate() + 6));
+    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() - 1));
+    const lastDayOfWeek = new Date(today.setDate(firstDayOfWeek.getDate() + 14));;
     
     const firstDateOfWeek = firstDayOfWeek.toISOString().split("T")[0];
     const lastDateOfWeek = lastDayOfWeek.toISOString().split("T")[0];
@@ -77,7 +77,7 @@ export async function GET(request) {
         };
 
     const today = new Date();
-    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() - 6));
+    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() - 1));
     const lastDayOfWeek = new Date(today.setDate(firstDayOfWeek.getDate() + 14));
     
     const firstDateOfWeek = firstDayOfWeek.toISOString().split("T")[0];
