@@ -103,7 +103,6 @@ async function verifySteamId64(steamId64) {
 
 
 // 🎮 Función para obtener juegos de Steam
-// 🎮 Función para obtener juegos de Steam
 async function getSteamGames(steamId64) {
     const url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${process.env.STEAM_API_KEY}&steamid=${steamId64}&include_appinfo=true`;
     try {
